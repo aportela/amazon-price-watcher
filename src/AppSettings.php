@@ -17,5 +17,6 @@ return [
         'name' => 'main',
         'path' => isset($_ENV['docker']) ? 'php://stdout' : __DIR__ . '/../log/main.log',
         'level' => Monolog\Logger::DEBUG,
-    ]
+    ],
+    "lang" => 'es'
 ];
