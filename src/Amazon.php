@@ -11,11 +11,11 @@
         }
 
         public function getASIN() {
-            preg_match('/(?:dp|o|gp|-|dp\/product|gp\/product)\/(B[0-9]{2}[0-9A-Z]{7}|[0-9]{9}(?:X|[0-9]))/', $originalURL, $asin_arr);
+            preg_match('/(?:dp|o|gp|-|dp\/product|gp\/product)\/(B[0-9]{2}[0-9A-Z]{7}|[0-9]{9}(?:X|[0-9]))/', $$this->originalURL, $asin_arr);
             if (count($asin_arr) > 1) {
                 return($asin_arr[1]);
             } else {
-                throw new \InvalidArgumentException("Invalid url: " . $originalURL);
+                throw new \InvalidArgumentException("Invalid url: " . $this->originalURL);
             }
         }
     }
