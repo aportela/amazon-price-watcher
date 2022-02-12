@@ -24,4 +24,14 @@ return function ($app) {
         ]);
     });
 
+
+    $app->post('/api/scrap', function (Request $request, Response $response, array $args) {
+        $product = new \AmazonPriceWatcher\Amazon('https://www.amazon.es/gp/product/B08MV83J94/');
+        $product->scrap();
+        $payload = json_encode(['product' => $product ]);
+        $response->getBody()->write($payload);
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus(200);
+    });
 };
