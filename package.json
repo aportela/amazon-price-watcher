@@ -1,7 +1,28 @@
 {
-  "dependencies": {
-    "replace-hash-in-file-webpack-plugin": "^1.0.8",
+  "name": "amazon-price-watcher",
+  "version": "1.0.0",
+  "description": "Watch price changes for amazon products",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aportela/amazon-price-watcher.git"
+  },
+  "author": "alex",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/aportela/amazon-price-watcher/issues"
+  },
+  "homepage": "https://github.com/aportela/amazon-price-watcher#readme",
+  "devDependencies": {
+    "copy-webpack-plugin": "^10.2.4",
+    "html-webpack-plugin": "^5.5.0",
+    "vue": "^3.2.31",
+    "vue-router": "^4.0.12",
     "webpack": "^5.68.0",
-    "webpack-cli": "^4.9.2"
+    "webpack-cli": "^4.9.2",
+    "axios": "^0.25.0"
   }
 }
