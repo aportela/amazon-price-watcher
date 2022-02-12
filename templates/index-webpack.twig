@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="shortcut icon" href="icons/favicon.ico">
+        <title>Amazon-Price-Watcher</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" />
+        <link rel="stylesheet" href="styles/app.css">
+    </head>
+    <body>
+
+        <div id="app">
+            <transition name="fade">
+                <!-- component matched by the route will render here -->
+                <router-view></router-view>
+            </transition>
+        </div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.14/vue.min.js" integrity="sha512-XdUZ5nrNkVySQBnnM5vzDqHai823Spoq1W3pJoQwomQja+o4Nw0Ew1ppxo5bhF2vMug6sfibhKWcNJsG8Vj9tg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/vue-router/3.5.3/vue-router.min.js" integrity="sha512-/QcUyef9r0LQzC+WtTNs+gJNacB+x20p1ZaPKSldF9Vu3m+uOmz0bBpPpsmHncv1ehuOCwnMXYydvl1KkW7Xow==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script type="text/javascript">
+            {% if initialState is defined %}
+            window.initialState = JSON.parse('{{ initialState | raw }}');
+            {% else %}
+            window.initialState = {};
+            {% endif %}
+            if (window.initialState.debug) {
+                console.group('initialState');
+                console.log(window.initialState);
+                console.groupEnd();
+            }
+        </script>
+
+        {% if settings.production %}
+        <script type="module" src="scripts/app-bundle.min.js?7046201617e6da177ac9"></script>
+        {% else %}
+        <script type="module" src="scripts/app.js"></script>
+        {% endif %}
+
+    </body>
+</html>

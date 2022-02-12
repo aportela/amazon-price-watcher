@@ -1,2 +1,6 @@
 /vendor/
 /node_modules/
+/logs/*
+/cache/*
+composer.lock
+package-lock.json
