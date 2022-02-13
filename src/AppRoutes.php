@@ -13,7 +13,6 @@ return function ($app) {
 
     // ruta para generar el archivo principal (index)
     $app->get('/', function (Request $request, Response $response, $args) {
-        $ua = strtolower($_SERVER['HTTP_USER_AGENT']);
         return $this->get('view')->render($response, 'index-webpack.twig', [
             'initialState' => json_encode(
                 array(
