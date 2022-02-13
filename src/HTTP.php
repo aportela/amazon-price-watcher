@@ -26,7 +26,7 @@
                 if ($httpcode == 200) {
                     return($content);
                 } else {
-                    throw new \Exception("HTTP response code: " . $httpcode);
+                    throw new \Exception($httpcode);
                 }
             } else {
                 return(file_get_contents($url));
