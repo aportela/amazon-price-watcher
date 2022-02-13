@@ -5,7 +5,7 @@ const template = function () {
         <section class="section">
             <div class="field has-addons">
                 <div class="control is-expanded has-icons-left has-icons-right">
-                    <input class="input is-medium" type="email" placeholder="Type amazon URL" v-model.trim="url" :disabled="loading" readonly>
+                    <input class="input is-medium" type="email" placeholder="Type amazon URL" v-model.trim="url" :disabled="loading">
                     <span class="icon is-left">
                         <i class="fab fa-amazon"></i>
                     </span>
@@ -28,17 +28,18 @@ const template = function () {
             <div class="card" v-if="productData">
                 <div class="card-content">
                     <div class="content">
-                        <h1>{{ productData.productName }}</h1>
+                        <h4 class="has-text-danger" v-if="productData.affiliate"><i class="fas fa-exclamation-triangle"></i> This post may contain affiliate links ({{ productData.affiliate }}), which means that the original link creator may receive a commission if you make a purchase using these links.</h4>
+                        <h1 class="title is-4">{{ productData.productName }}</h1>
                         <div class="columns">
                             <div class="column is-half">
-                                <h2>Price: {{ productData.productPrice }}</h2>
-                                <figure class="image is-4by3">
+                                <p class="title is-5" v-if="productData.productPrice && productData.productCurrency">Price: {{ productData.productPrice.toFixed(2) }}{{ productData.productCurrency }}</p>
+                                <figure class="image">
                                 <img :src="productData.chartURL" alt="Camel Camel Camel Chart">
                                 </figure>
                             </div>
                             <div class="column is-half">
-                                <h2>Stock: {{ productData.productStock }}</h2>
-                                <figure class="image is-4by3">
+                                <p class="title is-5" v-if="productData.productStock">Stock: {{ productData.productStock }}</p>
+                                <figure class="image">
                                     <img :src="productData.imageURL" alt="Product Image">
                                 </figure>
                             </div>
@@ -56,7 +57,7 @@ export default {
     data: function () {
         return ({
             loading: false,
-            url: 'https://www.amazon.es/gp/product/B08MV83J94/',
+            url: null,
             productData: null
         });
     },
