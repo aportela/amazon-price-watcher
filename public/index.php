@@ -19,6 +19,12 @@ AppFactory::setContainer($container);
 
 $app = AppFactory::create();
 
+$app->addBodyParsingMiddleware();
+
+$app->addRoutingMiddleware();
+
+$app->addErrorMiddleware(true, true, true);
+
 (require __DIR__ . '/../src/AppRoutes.php')($app);
 
 $app->run();
