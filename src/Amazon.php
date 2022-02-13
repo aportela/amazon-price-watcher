@@ -5,6 +5,7 @@
     class Amazon {
 
         public $originalURL;
+        //public $cleanedURL;
         public $asin;
         public $productName;
         public $productStock;
@@ -18,7 +19,10 @@
             $missingExtensions = array_diff(["dom", "libxml"], get_loaded_extensions());
             if (count($missingExtensions) == 0) {
                 $this->originalURL = $url;
-                parse_str(parse_url($this->originalURL, PHP_URL_QUERY), $output);
+                $parsedURL = parse_url($this->originalURL);
+                // TODO: get cleaned URL without AFFILIATES
+                //$this->cleanedURL = $parsedURL['scheme'] . '://' . $parsedURL['host'] . $parsedURL['path'];
+                parse_str($parsedURL['query'], $output);
                 $this->affiliate = $output['tag'] ?? null;
                 $this->asin = $this->getASIN();
                 $this->chartURL = sprintf("https://charts.camelcamelcamel.com/es/%s/amazon.png?force=1&zero=0&w=855&h=513&desired=false&legend=1&ilt=1&tp=all&fo=0&lang=es_ES", $this->asin);
