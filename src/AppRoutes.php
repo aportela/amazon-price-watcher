@@ -25,12 +25,21 @@ return function ($app) {
 
 
     $app->post('/api/scrap', function (Request $request, Response $response, array $args) {
-        $product = new \AmazonPriceWatcher\Amazon('https://www.amazon.es/gp/product/B08MV83J94/');
-        $product->scrap();
-        $payload = json_encode(['product' => $product ]);
-        $response->getBody()->write($payload);
-        return $response
-            ->withHeader('Content-Type', 'application/json')
-            ->withStatus(200);
+        $url = $request->getParsedBody()['url'] ?? '';
+        if (! empty($url)) {
+            $product = new \AmazonPriceWatcher\Amazon($request->getParsedBody()['url'] ?? '');
+            $product->scrap();
+            $payload = json_encode(['product' => $product ]);
+            $response->getBody()->write($payload);
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(200);
+        } else {
+            $payload = json_encode(['error' => 'Missing url param' ]);
+            $response->getBody()->write($payload);
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(400);
+        }
     });
 };
