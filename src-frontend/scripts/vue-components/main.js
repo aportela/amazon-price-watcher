@@ -9,15 +9,15 @@ const template = function () {
                     <span class="icon is-left">
                         <i class="fab fa-amazon"></i>
                     </span>
-                    <span class="icon is-right" v-if="validURL">
+                    <span class="icon is-right" v-if="isValidURL">
                         <i class="fas fa-check"></i>
                     </span>
-                    <span class="icon is-right" v-if="invalidURL">
+                    <span class="icon is-right" v-if="! isValidURL">
                         <i class="fas fa-exclamation-triangle"></i>
                     </span>
                 </div>
                 <div class="control">
-                <button type="button" class="button is-info is-medium" :disabled="loading || invalidURL" @click.prevent="scrap">
+                <button type="button" class="button is-info is-medium" :disabled="loading || ! isValidURL" @click.prevent="scrap">
                     <span class="icon is-small">
                         <i class="fas" :class="{ 'fa-search': ! loading, 'fa-cog fa-spin': loading }"></i>
                     </span>
@@ -59,11 +59,13 @@ export default {
         return ({
             loading: false,
             url: null,
+            isValidURL: false,
             productData: null,
-            notFound : false
+            notFound: false
         });
     },
     computed: {
+        /*
         validURL: function () {
             if (this.url) {
                 return (true);
@@ -77,6 +79,24 @@ export default {
             } else {
                 return (false);
             }
+        },
+        */
+    },
+    watch: {
+        url: function (newValue, oldValue) {
+            if (newValue) {
+                let parsedURL = null;
+                let isValid = false;
+                // https://stackoverflow.com/a/43467144
+                try {
+                    parsedURL = new URL(newValue);
+                    isValid = true;
+                } catch (e) {
+                }
+                this.isValidURL = isValid && (parsedURL.protocol === "http:" || parsedURL.protocol === "https:");
+            } else {
+                this.isValidURL = false;
+            }
         }
     },
     methods: {
@@ -89,12 +109,12 @@ export default {
                 if (response.status == 200) {
                     this.productData = response.data.product;
                 } else {
-                    switch(response.status) {
+                    switch (response.status) {
                         case 404:
                             this.notFound = true;
-                        break;
+                            break;
                         default:
-                        break;
+                            break;
                     }
                 }
             });
