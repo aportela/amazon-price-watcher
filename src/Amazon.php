@@ -9,6 +9,7 @@
         public $productName;
         public $productStock;
         public $productPrice;
+        public $productCurrency;
         public $imageURL;
         public $chartURL;
         public $affiliate;
@@ -43,13 +44,53 @@
                 //$product["camelCamelCamelImageURL"] = "https://charts.camelcamelcamel.com/es/" . $product["ASIN"] . "/amazon.png?force=1&zero=0&w=855&h=513&desired=false&legend=1&ilt=1&tp=all&fo=0&lang=es_ES";
                 $this->productName = trim($domd->getElementById("productTitle")->textContent);
                 $this->productStock = trim($domd->getElementById("availability")->textContent);
-                $prodInfo = $xp->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' a-price ')]");
-                foreach($prodInfo as $info){
-                    $this->productPrice = trim($info->getElementsByTagName("span")->item(1)->textContent);
-                    if (! empty($this->productPrice)) {
-                        break;
+
+                $nodes = $xp->query('//input[@id="attach-base-product-price"]');
+                if (count($nodes) == 1) {
+                    $this->productPrice = floatval($nodes->item(0)->getAttribute('value'));
+                }
+
+                $nodes = $xp->query('//input[@id="attach-base-product-currency-symbol"]');
+                if (count($nodes) == 1) {
+                    $this->productCurrency = $nodes->item(0)->getAttribute('value');
+                }
+
+                if (empty($this->productPrice) || empty($this->productCurrency)) {
+                    $nodes = $xp->query("//*[contains(concat(' ', normalize-space(@class), ' '), 'twister-plus-buying-options-price-data')]");
+                    if (count($nodes) > 0) {
+                        if (! empty($nodes->item(0)->nodeValue)) {
+                            $json = json_decode($nodes->item(0)->nodeValue);
+                            if ($json != NULL) {
+                                $this->productPrice = floatval($json[0]->priceAmount);
+                                $this->productCurrency = $json[0]->currencySymbol;
+                            }
+                        }
                     }
                 }
+
+                /*
+                if (empty($this->productPrice)) {
+                    $prodInfo = $xp->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' a-price-whole ')]");
+                    foreach($prodInfo as $info){
+                        $this->productPrice = floatval(trim($info->textContent));
+                        //$this->productPrice = trim($info->getElementsByTagName("span")->item(0)->textContent);
+                        if (! empty($this->productPrice)) {
+                            break;
+                        }
+                    }
+                }
+
+                if (empty($this->productCurrency)) {
+                    $prodInfo = $xp->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' a-price-symbol ')]");
+                    foreach($prodInfo as $info){
+                        $this->productCurrency = trim($info->getElementsByTagName("span")->item(0)->textContent);
+                        if (! empty($this->productCurrency)) {
+                            break;
+                        }
+                    }
+                }
+                */
+
                 $this->imageURL = trim($domd->getElementById("landingImage")->getAttribute('src'));
             } else {
                 // TODO
