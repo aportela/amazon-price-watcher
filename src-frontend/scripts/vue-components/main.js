@@ -34,7 +34,9 @@ const template = function () {
                             <div class="column is-half">
                                 <p class="title is-5" v-if="productData.productPrice && productData.productCurrency">Price: {{ productData.productPrice.toFixed(2) }}{{ productData.productCurrency }}</p>
                                 <figure class="image">
-                                    <img :src="productData.chartURL" alt="Camel Camel Camel Chart">
+                                    <a :href="'https://es.camelcamelcamel.com/product/' + productData.asin" rel="noreferrer" target="_blank">
+                                        <img :src="productData.chartURL" alt="Camel Camel Camel Chart">
+                                    </a>
                                 </figure>
                             </div>
                             <div class="column is-half">
