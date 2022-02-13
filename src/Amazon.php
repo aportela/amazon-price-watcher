@@ -13,9 +13,14 @@
         public $chartURL;
 
         public function __construct (string $url = "") {
-            $this->originalURL = $url;
-            $this->asin = $this->getASIN();
-            $this->chartURL = sprintf("https://charts.camelcamelcamel.com/es/%s/amazon.png?force=1&zero=0&w=855&h=513&desired=false&legend=1&ilt=1&tp=all&fo=0&lang=es_ES", $this->asin);
+            $missingExtensions = array_diff(["dom", "libxml"], get_loaded_extensions());
+            if (count($missingExtensions) == 0) {
+                $this->originalURL = $url;
+                $this->asin = $this->getASIN();
+                $this->chartURL = sprintf("https://charts.camelcamelcamel.com/es/%s/amazon.png?force=1&zero=0&w=855&h=513&desired=false&legend=1&ilt=1&tp=all&fo=0&lang=es_ES", $this->asin);
+            } else {
+                throw new \Exception("missing required php extension/s: ", implode(", ", $missingExtensions));
+            }
         }
 
         public function getASIN() {
