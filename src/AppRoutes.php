@@ -28,12 +28,20 @@ return function ($app) {
         $url = $request->getParsedBody()['url'] ?? '';
         if (! empty($url)) {
             $product = new \AmazonPriceWatcher\Amazon($request->getParsedBody()['url'] ?? '');
-            $product->scrap();
+            $notFound = false;
+            try {
+                $product->scrap();
+            } catch (\Throwable $e) {
+                $product = null;
+                if ($e->getMessage() == "404") {
+                    $notFound = true;
+                }
+            }
             $payload = json_encode(['product' => $product ]);
             $response->getBody()->write($payload);
             return $response
                 ->withHeader('Content-Type', 'application/json')
-                ->withStatus(200);
+                ->withStatus($notFound ? 404: 200);
         } else {
             $payload = json_encode(['error' => 'Missing url param' ]);
             $response->getBody()->write($payload);

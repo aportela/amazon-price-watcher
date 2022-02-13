@@ -47,6 +47,7 @@ const template = function () {
                     </div>
                 </div>
             </div>
+            <p class="title is-4 has-text-danger has-text-centered" v-else-if="notFound"><i class="fas fa-exclamation-triangle"></i> Product not found</p>
         </section>
     `;
 };
@@ -58,7 +59,8 @@ export default {
         return ({
             loading: false,
             url: null,
-            productData: null
+            productData: null,
+            notFound : false
         });
     },
     computed: {
@@ -81,11 +83,19 @@ export default {
         scrap: function () {
             this.loading = true;
             this.productData = null;
+            this.notFound = false;
             amazonPriceWatcherAPI.amazon.scrap(this.url, (response) => {
                 this.loading = false;
                 if (response.status == 200) {
                     this.productData = response.data.product;
-                    console.log(this.productData);
+                } else {
+                    switch(response.status) {
+                        case 404:
+                            this.notFound = true;
+                        break;
+                        default:
+                        break;
+                    }
                 }
             });
         }
