@@ -5,7 +5,7 @@ const template = function () {
         <section class="section">
             <div class="field has-addons">
                 <div class="control is-expanded has-icons-left has-icons-right">
-                    <input class="input is-medium" type="email" placeholder="Type amazon URL" v-model.trim="url" :disabled="loading">
+                    <input class="input is-medium" type="email" placeholder="Type amazon URL" v-model.trim="url" :disabled="loading" @click.prevent="$event.target.select()">
                     <span class="icon is-left">
                         <i class="fab fa-amazon"></i>
                     </span>
@@ -27,23 +27,26 @@ const template = function () {
             </div>
             <div class="card" v-if="productData">
                 <div class="card-content">
-                    <div class="content">
+                    <div class="content" v-if="productData.productName">
                         <h4 class="has-text-danger" v-if="productData.affiliate"><i class="fas fa-exclamation-triangle"></i> This post may contain affiliate links ({{ productData.affiliate }}), which means that the original link creator may receive a commission if you make a purchase using these links.</h4>
                         <h1 class="title is-4">{{ productData.productName }}</h1>
-                        <div class="columns">
+                        <div class="columns is-vcentered">
                             <div class="column is-half">
                                 <p class="title is-5" v-if="productData.productPrice && productData.productCurrency">Price: {{ productData.productPrice.toFixed(2) }}{{ productData.productCurrency }}</p>
                                 <figure class="image">
-                                <img :src="productData.chartURL" alt="Camel Camel Camel Chart">
+                                    <img :src="productData.chartURL" alt="Camel Camel Camel Chart">
                                 </figure>
                             </div>
                             <div class="column is-half">
                                 <p class="title is-5" v-if="productData.productStock">Stock: {{ productData.productStock }}</p>
                                 <figure class="image">
-                                    <img :src="productData.imageURL" alt="Product Image">
+                                    <img :src="productData.imageURL" alt="Product Image" style="width: 320px;">
                                 </figure>
                             </div>
                         </div>
+                    </div>
+                    <div class="content" v-else>
+                        <p class="title is-4 has-text-danger has-text-centered" v-else-if="notFound"><i class="fas fa-exclamation-triangle"></i> Product not scraped</p>
                     </div>
                 </div>
             </div>
