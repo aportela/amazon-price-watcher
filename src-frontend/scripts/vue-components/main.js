@@ -115,11 +115,13 @@ export default {
                     this.productData = response.data.product;
                 } else {
                     switch (response.status) {
+                        case 400:
+                            this.isValidURL = false;
+                        default:
                         case 404:
                             this.notFound = true;
                             break;
-                        default:
-                            break;
+                        break;
                     }
                 }
             });

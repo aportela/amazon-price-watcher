@@ -27,21 +27,35 @@ return function ($app) {
     $app->post('/api/scrap', function (Request $request, Response $response, array $args) {
         $url = $request->getParsedBody()['url'] ?? '';
         if (! empty($url)) {
-            $product = new \AmazonPriceWatcher\Amazon($request->getParsedBody()['url'] ?? '');
+            $product = null;
             $notFound = false;
+            $invalidURL = false;
             try {
-                $product->scrap();
-            } catch (\Throwable $e) {
-                $product = null;
-                if ($e->getMessage() == "404") {
-                    $notFound = true;
-                }
+                $product = new \AmazonPriceWatcher\Amazon($request->getParsedBody()['url'] ?? '');
+            } catch (\InvalidArgumentException $e) {
+                $invalidURL = true;
             }
-            $payload = json_encode(['product' => $product ]);
-            $response->getBody()->write($payload);
-            return $response
-                ->withHeader('Content-Type', 'application/json')
-                ->withStatus($notFound ? 404: 200);
+            if ($product && ! $invalidURL) {
+                try {
+                    $product->scrap();
+                } catch (\Throwable $e) {
+                    $product = null;
+                    if ($e->getMessage() == "404") {
+                        $notFound = true;
+                    }
+                }
+                $payload = json_encode(['product' => $product ]);
+                $response->getBody()->write($payload);
+                return $response
+                    ->withHeader('Content-Type', 'application/json')
+                    ->withStatus($notFound ? 404: 200);
+            } else {
+                $payload = json_encode(['error' => 'Invalid url param' ]);
+                $response->getBody()->write($payload);
+                return $response
+                    ->withHeader('Content-Type', 'application/json')
+                    ->withStatus(400);
+            }
         } else {
             $payload = json_encode(['error' => 'Missing url param' ]);
             $response->getBody()->write($payload);
