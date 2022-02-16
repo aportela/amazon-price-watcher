@@ -1,4 +1,4 @@
-import { default as amazonPriceWatcherAPI } from '../api.js';
+import api, { default as amazonPriceWatcherAPI } from '../api.js';
 
 const template = function () {
     return `
@@ -25,7 +25,7 @@ const template = function () {
                 </button>
                 </div>
             </div>
-            <table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth" v-if="items && items.length > 0">
+            <table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth">
                 <thead>
                     <tr>
                         <th style="width: 50%">Article</th>
@@ -34,13 +34,19 @@ const template = function () {
                         <th class="has-text-right">Increment</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr v-for="item in items">
+                <tbody v-for="group in groups">
+                    <tr class="has-background-grey-lighter has-text-black" style="cursor: pointer;" @click.prevent="hideItems = !hideItems">
+                        <th><i class="fas" :class="{ 'fa-angle-double-up': ! hideItems, 'fa-angle-double-down': hideItems }"></i> {{ group.name }}</th>
+                        <th class="has-text-right">{{ group.price }}{{ group.currency }}</th>
+                        <th class="has-text-right">{{ group.previousPrice }}{{ group.currency }}</th>
+                        <td class="has-text-right has-text-weight-bold has-text-danger"><i class="fa-fw fas fa-sort-amount-up is-pulled-left"></i> <span class="is-pulled-right">{{ (group.previousPrice - group.price).toFixed(2) }}{{ group.currency }}</span></td>
+                    </tr>
+                    <tr v-for="item in group.items">
                         <td style="width: 50%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" :title="item.name">{{ item.name.substring(0, 80) }}...</td>
                         <td class="has-text-right">{{ item.price.toFixed(2) }}€</td>
-                        <td class="has-text-right">{{ (item.price - 100).toFixed(2) }}€</td>
-                        <td class="has-text-right has-text-weight-bold has-text-danger" v-if="item.price > 1000"><i class="fa-fw fas fa-sort-amount-up"></i> +2.34€</td>
-                        <td class="has-text-right has-text-weight-bold has-text-success" v-else><i class="fas fa-sort-amount-down"></i> -4.56€</td>
+                        <td class="has-text-right">{{ (item.previousPrice).toFixed(2) }}€</td>
+                        <td class="has-text-right has-text-weight-bold has-text-success" v-if="(item.previousPrice - item.price) < 0"><i class="fa-fw fas fa-sort-amount-down is-pulled-left"></i> <span class="is-pulled-right">{{ (item.previousPrice - item.price).toFixed(2)}}{{ item.currency }}</span></td>
+                        <td class="has-text-right has-text-weight-bold has-text-danger" v-else><i class="fas fa-sort-amount-up is-pulled-left"></i> <span class="is-pulled-right">+{{(item.previousPrice - item.price).toFixed(2) }}{{ item.currency }}</span></td>
                     </tr>
                 </tbody>
             </table>
@@ -86,26 +92,17 @@ export default {
             isValidURL: false,
             productData: null,
             notFound: false,
-            items: [
-                {
-                    url: 'https://www.amazon.es/Apple-MacBook-16-polegadas-Processador-8-Core/dp/B08T1TK63N/',
-                    name: 'Apple MacBook Pro (de 16 polegadas, Touch Bar, Processador Intel Core i9 8-Core a 2,3 GHz, 16 GB RAM, 1 TB) - Prateado (2019)',
-                    price: 2851.06,
-                    currency: '€'
-                },
-                {
-                    url: 'https://www.amazon.es/GIGABYTE-PORTATIL-YD-93ES648SP-i9-11980HK-Samsung/dp/B09F72HD9Y/',
-                    name: 'GIGABYTE PORTATIL Aero 15 OLED YD-93ES648SP,i9-11980HK,32GB,SSD 512G+SSD1TB,15.6" Samsung UHD OLED,VGARTX 3070Q/8GB,NO ODD,W10PRO',
-                    price: 3945.75,
-                    currency: '€'
-                },
-                {
-                    url: 'https://www.amazon.es/Intel-S1700-12900K-16x3-20-GEN12/dp/B09GYLB4J6/',
-                    name: 'Apple MacBook Pro (de 16 polegadas, Touch Bar, Processador Intel Core i9 8-Core a 2,3 GHz, 16 GB RAM, 1 TB) - Prateado (2019)',
-                    price: 602.45,
-                    currency: '€'
-                }
-            ]
+            hideItems: false,
+            groups: [],
+            items: []
+        });
+    },
+    created: function() {
+        amazonPriceWatcherAPI.amazonPriceWatcher.search((response) => {
+            if (response.status == 200) {
+                this.groups = response.data.groups;
+                this.items = response.data.items;
+            }
         });
     },
     computed: {
