@@ -15,6 +15,7 @@
         public $imageURL;
         public $chartURL;
         public $affiliate;
+        public $lastScrape;
 
         public function __construct (string $url = "") {
             $missingExtensions = array_diff(["dom", "libxml"], get_loaded_extensions());
@@ -99,6 +100,7 @@
                 */
 
                 $this->imageURL = trim($domd->getElementById("landingImage")->getAttribute('src'));
+                $this->lastScrape = new \DateTime();
             } else {
                 // TODO
             }

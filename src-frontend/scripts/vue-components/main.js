@@ -32,6 +32,7 @@ const template = function () {
                         <th class="has-text-right">Price</th>
                         <th class="has-text-right">Previous price</th>
                         <th class="has-text-right">Increment</th>
+                        <th>Updated</th>
                     </tr>
                 </thead>
                 <tbody v-for="group in groups">
@@ -40,6 +41,7 @@ const template = function () {
                         <th class="has-text-right">{{ group.price }}{{ group.currency }}</th>
                         <th class="has-text-right">{{ group.previousPrice }}{{ group.currency }}</th>
                         <td class="has-text-right has-text-weight-bold has-text-danger"><i class="fa-fw fas fa-sort-amount-up is-pulled-left"></i> <span class="is-pulled-right">{{ (group.previousPrice - group.price).toFixed(2) }}{{ group.currency }}</span></td>
+                        <th>1 minute ago</th>
                     </tr>
                     <tr v-for="item in group.items">
                         <td style="width: 50%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" :title="item.name"><i class="fas fa-bookmark cursor-pointer" @click.prevent="onShowItemDetails(item)"></i> {{ item.name.substring(0, 80) }}...</td>
@@ -47,11 +49,12 @@ const template = function () {
                         <td class="has-text-right">{{ (item.previousPrice).toFixed(2) }}€</td>
                         <td class="has-text-right has-text-weight-bold has-text-success" v-if="(item.previousPrice - item.price) < 0"><i class="fa-fw fas fa-sort-amount-down is-pulled-left"></i> <span class="is-pulled-right">{{ (item.previousPrice - item.price).toFixed(2)}}{{ item.currency }}</span></td>
                         <td class="has-text-right has-text-weight-bold has-text-danger" v-else><i class="fas fa-sort-amount-up is-pulled-left"></i> <span class="is-pulled-right">+{{(item.previousPrice - item.price).toFixed(2) }}{{ item.currency }}</span></td>
+                        <th>1 hour ago</th>
                     </tr>
                 </tbody>
                 <tbody>
                     <tr class="has-background-grey-lighter has-text-black" style="cursor: pointer;" @click.prevent="hideItems = !hideItems">
-                        <th colspan="4">Orphaned items</th>
+                        <th colspan="5">Orphaned items</th>
                     </tr>
                     <tr v-for="item in items">
                         <td style="width: 50%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" :title="item.name"><i class="fas fa-bookmark cursor-pointer" @click.prevent="onShowItemDetails(item)"></i> {{ item.name.substring(0, 80) }}...</td>
@@ -59,6 +62,7 @@ const template = function () {
                         <td class="has-text-right">{{ (item.previousPrice).toFixed(2) }}€</td>
                         <td class="has-text-right has-text-weight-bold has-text-success" v-if="(item.previousPrice - item.price) < 0"><i class="fa-fw fas fa-sort-amount-down is-pulled-left"></i> <span class="is-pulled-right">{{ (item.previousPrice - item.price).toFixed(2)}}{{ item.currency }}</span></td>
                         <td class="has-text-right has-text-weight-bold has-text-danger" v-else><i class="fas fa-sort-amount-up is-pulled-left"></i> <span class="is-pulled-right">+{{(item.previousPrice - item.price).toFixed(2) }}{{ item.currency }}</span></td>
+                        <th>2 days ago</th>
                     </tr>
                 </tbody>
             </table>
