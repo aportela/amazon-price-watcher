@@ -7,10 +7,11 @@
         public $originalURL;
         //public $cleanedURL;
         public $asin;
-        public $productName;
-        public $productStock;
-        public $productPrice;
-        public $productCurrency;
+        public $name;
+        public $stock;
+        public $price;
+        public $previousPrice;
+        public $currency;
         public $imageURL;
         public $chartURL;
         public $affiliate;
@@ -22,8 +23,10 @@
                 $parsedURL = parse_url($this->originalURL);
                 // TODO: get cleaned URL without AFFILIATES
                 //$this->cleanedURL = $parsedURL['scheme'] . '://' . $parsedURL['host'] . $parsedURL['path'];
-                parse_str($parsedURL['query'], $output);
-                $this->affiliate = $output['tag'] ?? null;
+                if (isset($parsedURL['query'])) {
+                    parse_str($parsedURL['query'], $output);
+                    $this->affiliate = $output['tag'] ?? null;
+                }
                 $this->asin = $this->getASIN();
                 $this->chartURL = sprintf("https://charts.camelcamelcamel.com/es/%s/amazon.png?force=1&zero=0&w=855&h=513&desired=false&legend=1&ilt=1&tp=all&fo=0&lang=es_ES", $this->asin);
             } else {
@@ -46,27 +49,27 @@
                 @($domd = new \DOMDocument())->loadHTML($html);
                 $xp=new \DOMXPath($domd);
                 //$product["camelCamelCamelImageURL"] = "https://charts.camelcamelcamel.com/es/" . $product["ASIN"] . "/amazon.png?force=1&zero=0&w=855&h=513&desired=false&legend=1&ilt=1&tp=all&fo=0&lang=es_ES";
-                $this->productName = trim($domd->getElementById("productTitle")->textContent);
-                $this->productStock = trim($domd->getElementById("availability")->textContent);
+                $this->name = trim($domd->getElementById("productTitle")->textContent);
+                $this->stock = trim($domd->getElementById("availability")->textContent);
 
                 $nodes = $xp->query('//input[@id="attach-base-product-price"]');
                 if (count($nodes) == 1) {
-                    $this->productPrice = floatval($nodes->item(0)->getAttribute('value'));
+                    $this->price = floatval($nodes->item(0)->getAttribute('value'));
                 }
 
                 $nodes = $xp->query('//input[@id="attach-base-product-currency-symbol"]');
                 if (count($nodes) == 1) {
-                    $this->productCurrency = $nodes->item(0)->getAttribute('value');
+                    $this->currency = $nodes->item(0)->getAttribute('value');
                 }
 
-                if (empty($this->productPrice) || empty($this->productCurrency)) {
+                if (empty($this->price) || empty($this->produccurrencytCurrency)) {
                     $nodes = $xp->query("//*[contains(concat(' ', normalize-space(@class), ' '), 'twister-plus-buying-options-price-data')]");
                     if (count($nodes) > 0) {
                         if (! empty($nodes->item(0)->nodeValue)) {
                             $json = json_decode($nodes->item(0)->nodeValue);
                             if ($json != NULL) {
-                                $this->productPrice = floatval($json[0]->priceAmount);
-                                $this->productCurrency = $json[0]->currencySymbol;
+                                $this->price = floatval($json[0]->priceAmount);
+                                $this->currency = $json[0]->currencySymbol;
                             }
                         }
                     }

@@ -79,7 +79,9 @@ return function ($app) {
                             "name" => "Intel Core i9-10850K - Procesador de sobremesa (10 núcleos hasta 5,2 GHz, LGA1200 Intel 400 chipset), 125 W (99A6W4)",
                             "price" => 505.49,
                             "previousPrice" => 600.95,
-                            "currency" => "€"
+                            "currency" => "€",
+                            "imageURL" => null,
+                            "chartURL" => sprintf("https://charts.camelcamelcamel.com/es/%s/amazon.png?force=1&zero=0&w=855&h=513&desired=false&legend=1&ilt=1&tp=all&fo=0&lang=es_ES", 'B08CGT7T32')
                         ),
                         array(
                             "url" => 'https://www.amazon.es/ASUS-ROG-Strix-Z590-F-Gaming/dp/B08CDTJ1M8/',
@@ -87,7 +89,9 @@ return function ($app) {
                             "name" => 'ASUS ROG STRIX Z590-F GAMING WIFI - Placa base (Intel Z590 LGA 1200 ATX con VRM de 16 fases, PCIe 4.0, WIFI 6E, 2 Intel 2.5 GB Ethernet, 4 M.2 con disipadores, USB 3.2 Gen. 2, SATA y AURA Sync)',
                             "price" => 316.94,
                             "previousPrice" => 288.35,
-                            "currency" => "€"
+                            "currency" => "€",
+                            "imageURL" => null,
+                            "chartURL" => sprintf("https://charts.camelcamelcamel.com/es/%s/amazon.png?force=1&zero=0&w=855&h=513&desired=false&legend=1&ilt=1&tp=all&fo=0&lang=es_ES", 'B08CDTJ1M8')
                         ),
                         array(
                             "url" => 'https://www.amazon.es/Corsair-Vengeance-LPX-CMK32GX4M2E3200C16-m%C3%B3dulo/dp/B07RW6Z692/',
@@ -95,7 +99,9 @@ return function ($app) {
                             "name" => 'Corsair Vengeance LPX CMK32GX4M2E3200C16 módulo de Memoria 32 GB DDR4 3200 MHz',
                             "price" => 144.99,
                             "previousPrice" => 143.73,
-                            "currency" => "€"
+                            "currency" => "€",
+                            "imageURL" => null,
+                            "chartURL" => sprintf("https://charts.camelcamelcamel.com/es/%s/amazon.png?force=1&zero=0&w=855&h=513&desired=false&legend=1&ilt=1&tp=all&fo=0&lang=es_ES", 'B07RW6Z692')
                         )
                     )
                 )
@@ -107,7 +113,9 @@ return function ($app) {
                     "name" => 'Fruit of the Loom Heavy Cotton Tee Shirt 3 Pack, Camiseta de Manga Corta Para Hombre',
                     "price" => 7.91,
                     "previousPrice" => 11.99,
-                    "currency" => "€"
+                    "currency" => "€",
+                    "imageURL" => null,
+                    "chartURL" => sprintf("https://charts.camelcamelcamel.com/es/%s/amazon.png?force=1&zero=0&w=855&h=513&desired=false&legend=1&ilt=1&tp=all&fo=0&lang=es_ES", 'B00UC14EDQ')
                 ),
                 array(
                     "url" => 'https://www.amazon.es/gp/product/B0799QWLWY/',
@@ -115,7 +123,9 @@ return function ($app) {
                     "name" => 'M MAGEFESA Colombia - La cafetera Colombia está Fabricada en Aluminio Extra Grueso. Pomo y Mangos ergonómicos de bakelita Toque Frio (Negro, 12 Tazas), 8429113134167',
                     "price" => 28.07,
                     "previousPrice" => 21.99,
-                    "currency" => "€"
+                    "currency" => "€",
+                    "imageURL" => null,
+                    "chartURL" => sprintf("https://charts.camelcamelcamel.com/es/%s/amazon.png?force=1&zero=0&w=855&h=513&desired=false&legend=1&ilt=1&tp=all&fo=0&lang=es_ES", 'B0799QWLWY')
                 ),
                 array(
                     "url" => 'https://www.amazon.es/BRA-PRIOR-extra%C3%ADbles-inducci%C3%B3n-horno-Libre/dp/B00YF4TQLQ/',
@@ -123,7 +133,9 @@ return function ($app) {
                     "name" => 'BRA PRIOR - Cacerola baja con tapa de cristal y asas de silicona, apta para todo tipo de cocinas incluida inducción y horno, 32 cm',
                     "price" => 36.99,
                     "previousPrice" => 34.44,
-                    "currency" => "€"
+                    "currency" => "€",
+                    "imageURL" => null,
+                    "chartURL" => sprintf("https://charts.camelcamelcamel.com/es/%s/amazon.png?force=1&zero=0&w=855&h=513&desired=false&legend=1&ilt=1&tp=all&fo=0&lang=es_ES", 'B00YF4TQLQ')
                 )
             )
         );
