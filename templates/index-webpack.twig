@@ -14,10 +14,11 @@
 
         <div class="container is-widescreen" id="app">
             <h1 class="has-text-centered p-2 b-2"><img src="images/logo.png" alt="Amazon Price Watcher logo"></h1>
-            <transition name="fade">
-                <!-- component matched by the route will render here -->
-                <router-view></router-view>
-            </transition>
+            <router-view v-slot="{ Component }">
+                <transition>
+                    <component :is="Component" />
+                </transition>
+            </router-view>
         </div>
 
         <script type="text/javascript">
