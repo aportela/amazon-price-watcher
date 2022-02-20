@@ -15,15 +15,17 @@
                 curl_setopt ($ch, CURLOPT_FOLLOWLOCATION, true);
                 curl_setopt ($ch, CURLOPT_TIMEOUT, 3);
                 curl_setopt($ch, CURLOPT_ENCODING , 'gzip,deflate,br');
+                curl_setopt($ch, CURLOPT_COOKIEJAR, './cookie.txt');
+                curl_setopt($ch, CURLOPT_COOKIEFILE, './cookie.txt');
                 if (empty($userAgent)) {
-                    curl_setopt ($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/525.19 (KHTML, like Gecko) Chrome/0.2.153.1 Safari/525.19');
+                    curl_setopt ($ch, CURLOPT_USERAGENT, 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:97.0) Gecko/20100101 Firefox/97.0');
                 } else {
                     curl_setopt ($ch, CURLOPT_USERAGENT, $userAgent);
                 }
                 $content = curl_exec($ch);
                 $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
                 curl_close($ch);
-                if ($httpcode == 200) {
+                if ($httpcode == 200){
                     return($content);
                 } else {
                     throw new \Exception($httpcode);
