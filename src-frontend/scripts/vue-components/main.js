@@ -1,4 +1,5 @@
-import api, { default as amazonPriceWatcherAPI } from '../api.js';
+import { default as amazonPriceWatcherAPI } from '../api.js';
+import { default as tableItem } from './table-item.js';
 
 const template = function () {
     return `
@@ -28,11 +29,12 @@ const template = function () {
             <table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth">
                 <thead>
                     <tr>
-                        <th style="width: 50%">Article</th>
-                        <th class="has-text-right">Price</th>
-                        <th class="has-text-right">Previous price</th>
-                        <th class="has-text-right">Increment</th>
-                        <th>Updated</th>
+                        <th style="width: 50%" @click.prevent="onSort('name')">Article</th>
+                        <th class="has-text-right" @click.prevent="onSort('currentPrice')">Price</th>
+                        <th class="has-text-right" @click.prevent="onSort('previousPrice')">Previous price</th>
+                        <th class="has-text-right" @click.prevent="onSort('increment')">Increment</th>
+                        <th @click.prevent="onSort('lastUpdate')">Updated</th>
+                        <th>Operations</th>
                     </tr>
                 </thead>
                 <tbody v-for="group in groups">
@@ -42,58 +44,17 @@ const template = function () {
                         <th class="has-text-right">{{ group.previousPrice }}{{ group.currency }}</th>
                         <td class="has-text-right has-text-weight-bold has-text-danger"><i class="fa-fw fas fa-sort-amount-up is-pulled-left"></i> <span class="is-pulled-right">{{ (group.previousPrice - group.price).toFixed(2) }}{{ group.currency }}</span></td>
                         <th>1 minute ago</th>
+                        <th></th>
                     </tr>
-                    <tr v-for="item in group.items">
-                        <td style="width: 50%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" :title="item.name"><i class="fas fa-bookmark cursor-pointer" @click.prevent="onShowItemDetails(item)"></i> {{ item.name.substring(0, 80) }}...</td>
-                        <td class="has-text-right">{{ item.price.toFixed(2) }}€</td>
-                        <td class="has-text-right">{{ (item.previousPrice).toFixed(2) }}€</td>
-                        <td class="has-text-right has-text-weight-bold has-text-success" v-if="(item.previousPrice - item.price) < 0"><i class="fa-fw fas fa-sort-amount-down is-pulled-left"></i> <span class="is-pulled-right">{{ (item.previousPrice - item.price).toFixed(2)}}{{ item.currency }}</span></td>
-                        <td class="has-text-right has-text-weight-bold has-text-danger" v-else><i class="fas fa-sort-amount-up is-pulled-left"></i> <span class="is-pulled-right">+{{(item.previousPrice - item.price).toFixed(2) }}{{ item.currency }}</span></td>
-                        <th>1 hour ago</th>
-                    </tr>
+                    <table-row-item v-for="item in items" :item="item" :disabled="loading" v-on:refresh="onRefresh(item.id)" v-on:delete="onDelete(item.id)"></table-row-item>
                 </tbody>
                 <tbody>
                     <tr class="has-background-grey-lighter has-text-black" style="cursor: pointer;" @click.prevent="hideItems = !hideItems">
-                        <th colspan="5">Orphaned items</th>
+                        <th colspan="6">Orphaned items</th>
                     </tr>
-                    <tr v-for="item in items">
-                        <td style="width: 50%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" :title="item.name"><i class="fas fa-bookmark cursor-pointer" @click.prevent="onShowItemDetails(item)"></i> {{ item.name.substring(0, 80) }}...</td>
-                        <td class="has-text-right">{{ item.price.toFixed(2) }}€</td>
-                        <td class="has-text-right">{{ (item.previousPrice).toFixed(2) }}€</td>
-                        <td class="has-text-right has-text-weight-bold has-text-success" v-if="(item.previousPrice - item.price) < 0"><i class="fa-fw fas fa-sort-amount-down is-pulled-left"></i> <span class="is-pulled-right">{{ (item.previousPrice - item.price).toFixed(2)}}{{ item.currency }}</span></td>
-                        <td class="has-text-right has-text-weight-bold has-text-danger" v-else><i class="fas fa-sort-amount-up is-pulled-left"></i> <span class="is-pulled-right">+{{(item.previousPrice - item.price).toFixed(2) }}{{ item.currency }}</span></td>
-                        <th>2 days ago</th>
-                    </tr>
+                    <table-row-item v-for="item in items" :item="item" :disabled="loading" v-on:refresh="onRefresh(item.id)" v-on:delete="onDelete(item.id)"></table-row-item>
                 </tbody>
             </table>
-            <div class="card" v-if="productData">
-                <div class="card-content">
-                    <div class="content" v-if="productData.name">
-                        <h4 class="has-text-danger" v-if="productData.affiliate"><i class="fas fa-exclamation-triangle"></i> This post may contain affiliate links ({{ productData.affiliate }}), which means that the original link creator may receive a commission if you make a purchase using these links.</h4>
-                        <h1 class="title is-4">{{ productData.name }}</h1>
-                        <div class="columns is-vcentered">
-                            <div class="column is-half">
-                                <p class="title is-5" v-if="productData.price && productData.currency">Price: {{ productData.price.toFixed(2) }}{{ productData.currency }}</p>
-                                <figure class="image">
-                                    <a :href="'https://es.camelcamelcamel.com/product/' + productData.asin" rel="noreferrer" target="_blank">
-                                        <img :src="productData.chartURL" alt="Camel Camel Camel Chart">
-                                    </a>
-                                </figure>
-                            </div>
-                            <div class="column is-half">
-                                <p class="title is-5" v-if="productData.stock">Stock: {{ productData.stock }}</p>
-                                <figure class="image">
-                                    <img :src="productData.imageURL" alt="Product Image" style="width: 320px;">
-                                </figure>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="content" v-else>
-                        <p class="title is-4 has-text-danger has-text-centered" v-else-if="notFound"><i class="fas fa-exclamation-triangle"></i> Product not scraped</p>
-                    </div>
-                </div>
-            </div>
-            <p class="title is-4 has-text-danger has-text-centered" v-else-if="notFound"><i class="fas fa-exclamation-triangle"></i> Product not found</p>
         </section>
     `;
 };
@@ -110,16 +71,13 @@ export default {
             notFound: false,
             hideItems: false,
             groups: [],
-            items: []
+            items: [],
+            sortByField: 'lastUpdate',
+            sortOrder: 'DESC'
         });
     },
-    created: function() {
-        amazonPriceWatcherAPI.amazonPriceWatcher.search((response) => {
-            if (response.status == 200) {
-                this.groups = response.data.groups;
-                this.items = response.data.items;
-            }
-        });
+    created: function () {
+        this.onLoad();
     },
     computed: {
         /*
@@ -156,7 +114,23 @@ export default {
             }
         }
     },
+    components: {
+        'table-row-item': tableItem
+    },
     methods: {
+        onLoad: function () {
+            this.loading = true;
+            amazonPriceWatcherAPI.amazonPriceWatcher.search((response) => {
+                this.loading = false;
+                if (response.status == 200) {
+                    this.groups = response.data.groups;
+                    this.items = response.data.items.map((item) => {
+                        item.increment = item.previousPrice - item.currentPrice;
+                        return (item);
+                    });
+                }
+            });
+        },
         scrap: function () {
             this.loading = true;
             this.productData = null;
@@ -165,10 +139,8 @@ export default {
                 this.loading = false;
                 if (response.status == 200) {
                     this.productData = response.data.product;
-                    //console.log(this.items);
-                    //console.log(this.productData);
-                    //this.items.push(this.productData);
-                    console.log(this.productData);
+                    this.url = null;
+                    this.onLoad();
                 } else {
                     switch (response.status) {
                         case 400:
@@ -182,8 +154,53 @@ export default {
                 }
             });
         },
-        onShowItemDetails: function(item) {
+        onDelete: function (id) {
+            this.loading = true;
+            amazonPriceWatcherAPI.amazonPriceWatcher.delete(id, (response) => {
+                this.loading = false;
+                if (response.status == 200) {
+                    this.onLoad();
+                } else {
+                }
+            });
+        },
+        onShowItemDetails: function (item) {
             this.productData = item;
+        },
+        onRefresh: function (id) {
+            this.loading = true;
+            this.productData = null;
+            this.notFound = false;
+            amazonPriceWatcherAPI.amazon.refresh(id, (response) => {
+                this.loading = false;
+                if (response.status == 200) {
+                } else {
+                }
+            });
+        },
+        onSort: function (field) {
+            this.items.sort(this.sortBy(field));
+        },
+        // https://medium.com/@asadise/sorting-a-json-array-according-one-property-in-javascript-18b1d22cd9e9
+        sortBy: function (property) {
+            this.sortOrder = this.sortOrder == 'DESC' ? 'ASC' : 'DESC';
+            if (this.sortOrder == 'ASC') {
+                return function (a, b) {
+                    if (a[property] > b[property])
+                        return 1;
+                    else if (a[property] < b[property])
+                        return -1;
+                    return 0;
+                }
+            } else {
+                return function (a, b) {
+                    if (a[property] < b[property])
+                        return 1;
+                    else if (a[property] > b[property])
+                        return -1;
+                    return 0;
+                }
+            }
         }
     }
 }
