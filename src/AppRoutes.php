@@ -26,35 +26,53 @@ return function ($app) {
 
     $app->post('/api/scrap', function (Request $request, Response $response, array $args) {
         $url = $request->getParsedBody()['url'] ?? '';
-        if (! empty($url)) {
+        $id = $request->getParsedBody()['id'] ?? '';
+        if (! empty($url) || ! empty($id)) {
             $product = null;
             $notFound = false;
             $invalidURL = false;
+            $errorMessage = null;
             try {
-                $product = new \AmazonPriceWatcher\Amazon($request->getParsedBody()['url'] ?? '');
+                $item = new \AmazonPriceWatcher\AmazonPriceWatcherItem();
+                if (! empty($id)) {
+                    $item->id = $id;
+                    $item->get();
+                } else {
+                    $item->setFromURL($url);
+                    $item->get();
+                }
             } catch (\InvalidArgumentException $e) {
                 $invalidURL = true;
             }
-            if ($product && ! $invalidURL) {
-                try {
-                    $product->scrap();
-                } catch (\Throwable $e) {
-                    $product = null;
-                    if ($e->getMessage() == "404") {
-                        $notFound = true;
+            try {
+                $item->scrap();
+                if (! empty($item->name)) {
+                    if (! empty($item->id)) {
+                        $item->update();
+                    } else {
+                        $item->add();
                     }
                 }
-                $payload = json_encode(['product' => $product ]);
+            } catch (\Throwable $e) {
+                if ($e->getMessage() == "404") {
+                    $notFound = true;
+                } else {
+                    $errorMessage = $e->getMessage();
+                }
+            }
+            if (empty($errorMessage)) {
+                $payload = json_encode(['product' => $item ]);
                 $response->getBody()->write($payload);
                 return $response
                     ->withHeader('Content-Type', 'application/json')
                     ->withStatus($notFound ? 404: 200);
             } else {
-                $payload = json_encode(['error' => 'Invalid url param' ]);
+                $payload = json_encode(['product' => null, 'error' => $errorMessage ]);
                 $response->getBody()->write($payload);
                 return $response
                     ->withHeader('Content-Type', 'application/json')
-                    ->withStatus(400);
+                    ->withStatus($notFound ? 404: 200);
+
             }
         } else {
             $payload = json_encode(['error' => 'Missing url param' ]);
@@ -65,8 +83,26 @@ return function ($app) {
         }
     });
 
+    $app->post('/api/delete', function (Request $request, Response $response, array $args) {
+        $id = $request->getParsedBody()['id'] ?? '';
+        if (! empty($id)) {
+            \AmazonPriceWatcher\AmazonPriceWatcherItem::delete($id);
+            $payload = json_encode(['success' => true ]);
+            $response->getBody()->write($payload);
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(200);
+        } else {
+            $payload = json_encode(['error' => 'Missing id param' ]);
+            $response->getBody()->write($payload);
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(400);
+        }
+    });
+
     $app->get('/api/search', function (Request $request, Response $response, array $args) {
-        $payload = file_get_contents(__DIR__ . '/results.json');
+        $payload = json_encode(array("items" => \AmazonPriceWatcher\AmazonPriceWatcherItem::search()));
         $response->getBody()->write($payload);
         return $response
             ->withHeader('Content-Type', 'application/json')
