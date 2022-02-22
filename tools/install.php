@@ -1,11 +1,15 @@
 <?php
     require ("../vendor/autoload.php");
 
-    unlink(__DIR__ . "/../data/amazon-price-watcher.sqlite3");
+    define('DATABASE_PATH', __DIR__ . '/../data/amazon-price-watcher.sqlite3');
+
+    if (file_exists(DATABASE_PATH)) {
+        unlink(DATABASE_PATH);
+    }
 
     $dbh = new \PDO
     (
-        sprintf("sqlite:%s", __DIR__ . "/../data/amazon-price-watcher.sqlite3"),
+        sprintf("sqlite:%s", DATABASE_PATH),
         null,
         null,
         array(
