@@ -305,5 +305,70 @@
             return($results);
         }
 
+        public static function searchGroups() {
+            $results = array();
+            $dbh = new \PDO
+            (
+                sprintf("sqlite:%s", __DIR__ . "/../data/amazon-price-watcher.sqlite3"),
+                null,
+                null,
+                array(
+                    \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION
+                )
+            );
+            $query = "
+                SELECT
+                    ID, NAME
+                FROM GROUPS
+                ORDER BY NAME
+            ";
+            $stmt = $dbh->prepare($query);
+            $stmt->execute();
+            while ($row = $stmt->fetchObject()) {
+                $result = new \stdClass();
+                $result->id = $row->ID;
+                $result->name = $row->NAME;
+                $results[] = $result;
+            }
+            return($results);
+        }
+
+        public static function addGroup($name) {
+            $dbh = new \PDO
+            (
+                sprintf("sqlite:%s", __DIR__ . "/../data/amazon-price-watcher.sqlite3"),
+                null,
+                null,
+                array(
+                    \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION
+                )
+            );
+            $query = "
+                INSERT INTO GROUPS (ID, NAME) VALUES (:ID, :NAME)
+            ";
+            $stmt = $dbh->prepare($query);
+            $stmt->bindValue(":ID", \AmazonPriceWatcher\AmazonPriceWatcherItem::uuid(), \PDO::PARAM_STR);
+            $stmt->bindValue(":NAME", $name, \PDO::PARAM_STR);
+            $stmt->execute();
+        }
+
+        public static function deleteGroup(string $id) {
+            $dbh = new \PDO
+            (
+                sprintf("sqlite:%s", __DIR__ . "/../data/amazon-price-watcher.sqlite3"),
+                null,
+                null,
+                array(
+                    \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION
+                )
+            );
+            $query = "
+                DELETE FROM GROUPS WHERE ID = :ID
+            ";
+            $stmt = $dbh->prepare($query);
+            $stmt->bindValue(":ID", $id, \PDO::PARAM_STR);
+            $stmt->execute();
+        }
+
     }
 ?>

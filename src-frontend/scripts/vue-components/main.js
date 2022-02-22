@@ -26,6 +26,27 @@ const template = function () {
                 </button>
                 </div>
             </div>
+
+            <div class="field has-addons">
+                <div class="control is-expanded has-icons-left has-icons-right">
+                    <input class="input is-small" type="email" placeholder="Type group name" v-model.trim="newGroupName" :disabled="loading" @click.prevent="$event.target.select()">
+                    <span class="icon is-left">
+                        <i class="fas fa-list-ul"></i>
+                    </span>
+                    <span class="icon is-right" v-if="! newGroupName">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </span>
+                </div>
+                <div class="control">
+                    <button type="button" class="button is-info is-small" :disabled="loading || ! newGroupName" @click.prevent="onAddGroup">
+                        <span class="icon is-small">
+                            <i class="fas" :class="{ 'fa-plus': ! loading, 'fa-cog fa-spin': loading }"></i>
+                        </span>
+                        <span>Add group!</span>
+                    </button>
+                </div>
+            </div>
+
             <table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth">
                 <thead>
                     <tr>
@@ -38,15 +59,16 @@ const template = function () {
                     </tr>
                 </thead>
                 <tbody v-for="group in groups">
-                    <tr class="has-background-grey-lighter has-text-black" style="cursor: pointer;" @click.prevent="hideItems = !hideItems">
-                        <th><i class="fas" :class="{ 'fa-angle-double-up': ! hideItems, 'fa-angle-double-down': hideItems }"></i> {{ group.name }}</th>
-                        <th class="has-text-right">{{ group.price }}{{ group.currency }}</th>
-                        <th class="has-text-right">{{ group.previousPrice }}{{ group.currency }}</th>
-                        <td class="has-text-right has-text-weight-bold has-text-danger"><i class="fa-fw fas fa-sort-amount-up is-pulled-left"></i> <span class="is-pulled-right">{{ (group.previousPrice - group.price).toFixed(2) }}{{ group.currency }}</span></td>
-                        <th>1 minute ago</th>
+                    <tr class="has-background-grey-lighter has-text-black" style="cursor: pointer;" @click.prevent="group.collapsed = ! group.collapsed">
+                        <th><i class="fas" :class="{ 'fa-angle-double-up': ! group.collapsed, 'fa-angle-double-down': group.collapsed }"></i> {{ group.name }} (0 products)</th>
+                        <th class="has-text-right">{{ 0 }}{{ '€' }}</th>
+                        <th class="has-text-right">{{ 0 }}{{ '€' }}</th>
+                        <td class="has-text-right has-text-weight-bold"></td>
                         <th></th>
+                        <th class="has-text-centered">
+                            <button class="button is-small" @click.prevent="onDeleteGroup(group.id)" :disabled="disabled"><i class="far fa-trash-alt"></i></button>
+                        </th>
                     </tr>
-                    <table-row-item v-for="item in items" :item="item" :disabled="loading" v-on:refresh="onRefresh(item.id)" v-on:delete="onDelete(item.id)"></table-row-item>
                 </tbody>
                 <tbody>
                     <tr class="has-background-grey-lighter has-text-black" style="cursor: pointer;" @click.prevent="hideItems = !hideItems">
@@ -67,6 +89,7 @@ export default {
             loading: false,
             url: null,
             isValidURL: false,
+            newGroupName: null,
             productData: null,
             notFound: false,
             hideItems: false,
@@ -77,6 +100,7 @@ export default {
         });
     },
     created: function () {
+        this.onLoadGroups();
         this.onLoad();
     },
     computed: {
@@ -123,11 +147,42 @@ export default {
             amazonPriceWatcherAPI.amazonPriceWatcher.search((response) => {
                 this.loading = false;
                 if (response.status == 200) {
-                    this.groups = response.data.groups;
                     this.items = response.data.items.map((item) => {
                         item.increment = item.previousPrice - item.currentPrice;
                         return (item);
                     });
+                }
+            });
+        },
+        onLoadGroups: function () {
+            this.loading = true;
+            amazonPriceWatcherAPI.amazonPriceWatcher.searchGroups((response) => {
+                this.loading = false;
+                if (response.status == 200) {
+                    this.groups = response.data.groups.map((item) => {  item.collapsed = false; return(item); });
+                }
+            });
+        },
+        onAddGroup: function() {
+            this.loading = true;
+            amazonPriceWatcherAPI.amazonPriceWatcher.addGroup(this.newGroupName, (response) => {
+                this.loading = false;
+                if (response.status == 200) {
+                    this.newGroupName = null;
+                    this.onLoadGroups();
+                } else {
+                    // TODO
+                }
+            });
+        },
+        onDeleteGroup: function(id) {
+            this.loading = true;
+            amazonPriceWatcherAPI.amazonPriceWatcher.deleteGroup(id, (response) => {
+                this.loading = false;
+                if (response.status == 200) {
+                    this.onLoadGroups();
+                } else {
+                    // TODO
                 }
             });
         },

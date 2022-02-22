@@ -108,4 +108,49 @@ return function ($app) {
             ->withHeader('Content-Type', 'application/json')
             ->withStatus(200);
     });
+
+    $app->get('/api/search_groups', function (Request $request, Response $response, array $args) {
+        $payload = json_encode(array("groups" => \AmazonPriceWatcher\AmazonPriceWatcherItem::searchGroups()));
+        $response->getBody()->write($payload);
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus(200);
+    });
+
+    $app->post('/api/add_group', function (Request $request, Response $response, array $args) {
+        $name = $request->getParsedBody()['name'] ?? '';
+        if (! empty($name)) {
+            \AmazonPriceWatcher\AmazonPriceWatcherItem::addGroup($name);
+            $payload = json_encode(['success' => true ]);
+            $response->getBody()->write($payload);
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(200);
+        } else {
+            $payload = json_encode(['error' => 'Missing name param' ]);
+            $response->getBody()->write($payload);
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(400);
+        }
+    });
+
+    $app->post('/api/delete_group', function (Request $request, Response $response, array $args) {
+        $id = $request->getParsedBody()['id'] ?? '';
+        if (! empty($id)) {
+            \AmazonPriceWatcher\AmazonPriceWatcherItem::deleteGroup($id);
+            $payload = json_encode(['success' => true ]);
+            $response->getBody()->write($payload);
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(200);
+        } else {
+            $payload = json_encode(['error' => 'Missing name id' ]);
+            $response->getBody()->write($payload);
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(400);
+        }
+    });
+
 };
