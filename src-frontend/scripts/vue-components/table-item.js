@@ -1,7 +1,7 @@
 
 const template = function () {
     return `
-        <tr v-if="item" :class="{'has-background-success-light': (item.previousPrice - item.currentPrice) > 0, 'has-background-danger-light': (item.previousPrice - item.currentPrice) < 0}">
+        <tr v-if="item" class="cursor-pointer" :class="{'has-background-success-light': (item.previousPrice - item.currentPrice) > 0, 'has-background-danger-light': (item.previousPrice - item.currentPrice) < 0}" draggable="true" @dragstart="startDrag($event, item)">
             <td style="width: 20%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" :title="item.name">
             <button class="button is-small" @click.prevent="this.expanded = ! this.expanded"><i class="fas fa-fw" :class="{ 'fa-angle-double-up': this.expanded, 'fa-angle-double-down': ! this.expanded }"></i></button>
             {{ item.name.substring(0, 80) }}...
@@ -70,10 +70,15 @@ export default {
         'refresh', 'delete'
     ],
     methods: {
-        onRefresh: function(){
+        startDrag(evt, item) {
+            evt.dataTransfer.dropEffect = 'move';
+            evt.dataTransfer.effectAllowed = 'move';
+            evt.dataTransfer.setData('itemId', item.id);
+        },
+        onRefresh: function () {
             this.$emit("refresh");
         },
-        onDelete: function() {
+        onDelete: function () {
             this.$emit("delete");
         }
     }

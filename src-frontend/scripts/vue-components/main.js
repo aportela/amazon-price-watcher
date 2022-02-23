@@ -58,8 +58,8 @@ const template = function () {
                         <th>Operations</th>
                     </tr>
                 </thead>
-                <tbody v-for="group in groups">
-                    <tr class="has-background-grey-lighter has-text-black" style="cursor: pointer;" @click.prevent="group.collapsed = ! group.collapsed">
+                <tbody v-for="group, index in groups" :key="group.id">
+                    <tr class="has-background-grey-lighter has-text-black" style="cursor: pointer;" @click.prevent="group.collapsed = ! group.collapsed"  @drop="onDrop($event, index)" @dragover.prevent @dragenter.prevent>
                         <th><i class="fas" :class="{ 'fa-angle-double-up': ! group.collapsed, 'fa-angle-double-down': group.collapsed }"></i> {{ group.name }} (0 products)</th>
                         <th class="has-text-right">{{ 0 }}{{ '€' }}</th>
                         <th class="has-text-right">{{ 0 }}{{ '€' }}</th>
@@ -69,12 +69,13 @@ const template = function () {
                             <button class="button is-small" @click.prevent="onDeleteGroup(group.id)" :disabled="disabled"><i class="far fa-trash-alt"></i></button>
                         </th>
                     </tr>
+                    <table-row-item v-for="item in group.items" :key="item.id" :item="item" :disabled="loading"></table-row-item>
                 </tbody>
                 <tbody>
                     <tr class="has-background-grey-lighter has-text-black" style="cursor: pointer;" @click.prevent="hideItems = !hideItems">
-                        <th colspan="6">Orphaned items</th>
+                        <th colspan="6"><i class="fas" :class="{ 'fa-angle-double-up': ! hideItems, 'fa-angle-double-down': hideItems }"></i> All items</th>
                     </tr>
-                    <table-row-item v-for="item in items" :item="item" :disabled="loading" v-on:refresh="onRefresh(item.id)" v-on:delete="onDelete(item.id)"></table-row-item>
+                    <table-row-item v-for="item in items" :key="item.id" :item="item" :disabled="loading" v-on:refresh="onRefresh(item.id)" v-on:delete="onDelete(item.id)"></table-row-item>
                 </tbody>
             </table>
         </section>
@@ -142,6 +143,13 @@ export default {
         'table-row-item': tableItem
     },
     methods: {
+        onDrop(evt, groupIndex) {
+            const newItemId = evt.dataTransfer.getData('itemId');
+            if (! this.groups[groupIndex].items.find((item) => item.id == newItemId)) {
+                const item = this.items.find((item) => item.id == newItemId);
+                this.groups[groupIndex].items.push(item);
+            }
+        },
         onLoad: function () {
             this.loading = true;
             amazonPriceWatcherAPI.amazonPriceWatcher.search((response) => {
@@ -159,11 +167,11 @@ export default {
             amazonPriceWatcherAPI.amazonPriceWatcher.searchGroups((response) => {
                 this.loading = false;
                 if (response.status == 200) {
-                    this.groups = response.data.groups.map((item) => {  item.collapsed = false; return(item); });
+                    this.groups = response.data.groups.map((item) => { item.collapsed = false; return (item); });
                 }
             });
         },
-        onAddGroup: function() {
+        onAddGroup: function () {
             this.loading = true;
             amazonPriceWatcherAPI.amazonPriceWatcher.addGroup(this.newGroupName, (response) => {
                 this.loading = false;
@@ -175,7 +183,7 @@ export default {
                 }
             });
         },
-        onDeleteGroup: function(id) {
+        onDeleteGroup: function (id) {
             this.loading = true;
             amazonPriceWatcherAPI.amazonPriceWatcher.deleteGroup(id, (response) => {
                 this.loading = false;

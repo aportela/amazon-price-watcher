@@ -328,6 +328,7 @@
                 $result = new \stdClass();
                 $result->id = $row->ID;
                 $result->name = $row->NAME;
+                $result->items = [];
                 $results[] = $result;
             }
             return($results);
