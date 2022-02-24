@@ -8,7 +8,7 @@ const template = function () {
             </td>
             <td class="has-text-right">{{ item.currentPrice.toFixed(2) }}€</td>
             <td class="has-text-right">{{ (item.previousPrice).toFixed(2) }}€</td>
-            <td class="has-text-right has-text-weight-bold" v-if="(item.previousPrice - item.currentPrice) > 0"><i class="fa-fw fas fa-sort-amount-down is-pulled-left mt-2"></i> <span class="is-pulled-right">{{ (Math.abs(item.previousPrice - item.currentPrice)).toFixed(2)}}{{ item.currency }}</span></td>
+            <td class="has-text-right has-text-weight-bold" v-if="(item.previousPrice - item.currentPrice) > 0"><i class="fa-fw fas fa-sort-amount-down is-pulled-left mt-2"></i> <span class="is-pulled-right">-{{ (Math.abs(item.previousPrice - item.currentPrice)).toFixed(2)}}{{ item.currency }}</span></td>
             <td class="has-text-right has-text-weight-bold" v-else-if="(item.previousPrice - item.currentPrice) < 0"><i class="fas fa-sort-amount-up is-pulled-left mt-2"></i> <span class="is-pulled-right">+{{(Math.abs(item.previousPrice - item.currentPrice)).toFixed(2) }}{{ item.currency }}</span></td>
             <td class="has-text-right has-text-weight-bold" v-else><span class="is-pulled-right">{{(0).toFixed(2) }}{{ item.currency }}</span></td>
             <td>{{ item.lastUpdate.substring(0,10) }}</td>
