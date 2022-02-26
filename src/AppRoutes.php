@@ -145,7 +145,61 @@ return function ($app) {
                 ->withHeader('Content-Type', 'application/json')
                 ->withStatus(200);
         } else {
-            $payload = json_encode(['error' => 'Missing name id' ]);
+            $payload = json_encode(['error' => 'Missing id' ]);
+            $response->getBody()->write($payload);
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(400);
+        }
+    });
+
+    $app->post('/api/add_group_item', function (Request $request, Response $response, array $args) {
+        $groupId = $request->getParsedBody()['groupId'] ?? '';
+        if (! empty($groupId)) {
+            $itemId = $request->getParsedBody()['itemId'] ?? '';
+            if (! empty($itemId)) {
+                \AmazonPriceWatcher\AmazonPriceWatcherItem::addGroupItem($groupId, $itemId);
+                $payload = json_encode(['success' => true ]);
+                $response->getBody()->write($payload);
+                return $response
+                    ->withHeader('Content-Type', 'application/json')
+                    ->withStatus(200);
+            } else {
+                $payload = json_encode(['error' => 'Missing itemId' ]);
+                $response->getBody()->write($payload);
+                return $response
+                    ->withHeader('Content-Type', 'application/json')
+                    ->withStatus(400);
+                }
+        } else {
+            $payload = json_encode(['error' => 'Missing groupId' ]);
+            $response->getBody()->write($payload);
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(400);
+        }
+    });
+
+    $app->post('/api/delete_group_item', function (Request $request, Response $response, array $args) {
+        $groupId = $request->getParsedBody()['groupId'] ?? '';
+        if (! empty($groupId)) {
+            $itemId = $request->getParsedBody()['itemId'] ?? '';
+            if (! empty($itemId)) {
+                \AmazonPriceWatcher\AmazonPriceWatcherItem::deleteGroupItem($groupId, $itemId);
+                $payload = json_encode(['success' => true ]);
+                $response->getBody()->write($payload);
+                return $response
+                    ->withHeader('Content-Type', 'application/json')
+                    ->withStatus(200);
+            } else {
+                $payload = json_encode(['error' => 'Missing itemId' ]);
+                $response->getBody()->write($payload);
+                return $response
+                    ->withHeader('Content-Type', 'application/json')
+                    ->withStatus(400);
+                }
+        } else {
+            $payload = json_encode(['error' => 'Missing groupId' ]);
             $response->getBody()->write($payload);
             return $response
                 ->withHeader('Content-Type', 'application/json')

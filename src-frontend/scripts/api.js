@@ -2,7 +2,7 @@ import axios from 'axios';
 
 export default {
     amazonPriceWatcher: {
-        search: function(callback) {
+        search: function (callback) {
             axios.get("api/search").then(
                 (response) => {
                     if (callback && typeof callback === "function") {
@@ -17,7 +17,7 @@ export default {
                 }
             );
         },
-        delete: function(id, callback) {
+        delete: function (id, callback) {
             axios.post("api/delete", { id: id }).then(
                 (response) => {
                     if (callback && typeof callback === "function") {
@@ -32,7 +32,7 @@ export default {
                 }
             );
         },
-        addGroup: function(name, callback) {
+        addGroup: function (name, callback) {
             axios.post("api/add_group", { name: name }).then(
                 (response) => {
                     if (callback && typeof callback === "function") {
@@ -47,7 +47,7 @@ export default {
                 }
             );
         },
-        deleteGroup: function(id, callback) {
+        deleteGroup: function (id, callback) {
             axios.post("api/delete_group", { id: id }).then(
                 (response) => {
                     if (callback && typeof callback === "function") {
@@ -62,7 +62,37 @@ export default {
                 }
             );
         },
-        searchGroups: function(callback) {
+        addGroupItem: function (groupId, itemId, callback) {
+            axios.post("api/add_group_item", { groupId: groupId, itemId: itemId }).then(
+                (response) => {
+                    if (callback && typeof callback === "function") {
+                        callback(response);
+                    }
+                }
+            ).catch(
+                (error) => {
+                    if (callback && typeof callback === "function") {
+                        callback(error.response);
+                    }
+                }
+            );
+        },
+        deleteGroupItem: function (groupId, itemId, callback) {
+            axios.post("api/delete_group_item", { groupId: groupId, itemId: itemId }).then(
+                (response) => {
+                    if (callback && typeof callback === "function") {
+                        callback(response);
+                    }
+                }
+            ).catch(
+                (error) => {
+                    if (callback && typeof callback === "function") {
+                        callback(error.response);
+                    }
+                }
+            );
+        },
+        searchGroups: function (callback) {
             axios.get("api/search_groups").then(
                 (response) => {
                     if (callback && typeof callback === "function") {

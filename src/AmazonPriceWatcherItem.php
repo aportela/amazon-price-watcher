@@ -276,9 +276,11 @@
             );
             $query = "
                 SELECT
-                    ID, URL, ASIN, NAME, IMAGE_URL, CURRENT_PRICE, PREVIOUS_PRICE, MIN_PRICE, MAX_PRICE, CURRENCY, CURRENT_STOCK, LAST_SCRAP
-                FROM PRODUCT
-                ORDER BY LAST_SCRAP DESC
+                    P.ID, P.URL, P.ASIN, P.NAME, P.IMAGE_URL, P.CURRENT_PRICE, P.PREVIOUS_PRICE, P.MIN_PRICE, P.MAX_PRICE, P.CURRENCY, P.CURRENT_STOCK, P.LAST_SCRAP, GROUP_CONCAT(PRODUCT_GROUP.GROUP_ID, ',') AS GROUP_IDS
+                FROM PRODUCT P
+                LEFT JOIN PRODUCT_GROUP ON PRODUCT_GROUP.PRODUCT_ID = P.ID
+                GROUP BY P.ID, P.URL, P.ASIN, P.NAME, P.IMAGE_URL, P.CURRENT_PRICE, P.PREVIOUS_PRICE, P.MIN_PRICE, P.MAX_PRICE, P.CURRENCY, P.CURRENT_STOCK, P.LAST_SCRAP
+                ORDER BY P.LAST_SCRAP DESC
             ";
             $stmt = $dbh->prepare($query);
             $stmt->execute();
@@ -300,6 +302,7 @@
                 $result->currency = $row->CURRENCY;
                 $result->currentStock = $row->CURRENT_STOCK;
                 $result->lastUpdate = $row->LAST_SCRAP;
+                $result->groupIds = $row->GROUP_IDS ? explode(',', $row->GROUP_IDS): [];
                 $results[] = $result;
             }
             return($results);
@@ -328,7 +331,6 @@
                 $result = new \stdClass();
                 $result->id = $row->ID;
                 $result->name = $row->NAME;
-                $result->items = [];
                 $results[] = $result;
             }
             return($results);
@@ -363,6 +365,12 @@
                     \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION
                 )
             );
+
+            $query = "
+                DELETE FROM PRODUCT_GROUP WHERE GROUP_ID = :ID
+            ";
+            $stmt = $dbh->prepare($query);
+            $stmt->bindValue(":ID", $id, \PDO::PARAM_STR);
             $query = "
                 DELETE FROM GROUPS WHERE ID = :ID
             ";
@@ -370,6 +378,46 @@
             $stmt->bindValue(":ID", $id, \PDO::PARAM_STR);
             $stmt->execute();
         }
+
+        public static function addGroupItem(string $groupId, string $itemId) {
+            $dbh = new \PDO
+            (
+                sprintf("sqlite:%s", __DIR__ . "/../data/amazon-price-watcher.sqlite3"),
+                null,
+                null,
+                array(
+                    \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION
+                )
+            );
+            $query = "
+                REPLACE INTO PRODUCT_GROUP (GROUP_ID, PRODUCT_ID) VALUES (:GROUP_ID, :PRODUCT_ID)
+            ";
+            $stmt = $dbh->prepare($query);
+            $stmt->bindValue(":GROUP_ID", $groupId, \PDO::PARAM_STR);
+            $stmt->bindValue(":PRODUCT_ID", $itemId, \PDO::PARAM_STR);
+            $stmt->execute();
+        }
+
+        public static function deleteGroupItem(string $groupId, string $itemId) {
+            $dbh = new \PDO
+            (
+                sprintf("sqlite:%s", __DIR__ . "/../data/amazon-price-watcher.sqlite3"),
+                null,
+                null,
+                array(
+                    \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION
+                )
+            );
+            $query = "
+                DELETE FROM PRODUCT_GROUP WHERE GROUP_ID = :GROUP_ID AND PRODUCT_ID = :PRODUCT_ID
+            ";
+            $stmt = $dbh->prepare($query);
+            $stmt->bindValue(":GROUP_ID", $groupId, \PDO::PARAM_STR);
+            $stmt->bindValue(":PRODUCT_ID", $itemId, \PDO::PARAM_STR);
+            $stmt->execute();
+        }
+
+
 
     }
 ?>

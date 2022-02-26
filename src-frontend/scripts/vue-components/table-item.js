@@ -1,7 +1,7 @@
 
 const template = function () {
     return `
-        <tr v-if="item" class="cursor-pointer" :class="{'has-background-success-light': (item.previousPrice - item.currentPrice) > 0, 'has-background-danger-light': (item.previousPrice - item.currentPrice) < 0}" draggable="true" @dragstart="startDrag($event, item)">
+        <tr v-if="item" class="cursor-pointer is-vcentered" :class="{'has-background-success-light': (item.previousPrice - item.currentPrice) > 0, 'has-background-danger-light': (item.previousPrice - item.currentPrice) < 0}" draggable="true" @dragstart="startDrag($event, item)">
             <td style="width: 20%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" :title="item.name">
             <button class="button is-small" @click.prevent="this.expanded = ! this.expanded"><i class="fas fa-fw" :class="{ 'fa-angle-double-up': this.expanded, 'fa-angle-double-down': ! this.expanded }"></i></button>
             {{ item.name.substring(0, 80) }}...
@@ -15,10 +15,10 @@ const template = function () {
             <td>
                 <div class="field has-addons">
                     <p class="control">
-                        <button class="button is-small" @click.prevent="onRefresh" :disabled="disabled"><i class="fas fa-sync"></i></button>
+                        <button class="button is-small is-fullwidth" @click.prevent="onRefresh" :disabled="disabled"><i class="fas fa-sync"></i></button>
                     </p>
                     <p class="control">
-                        <button class="button is-small" @click.prevent="onDelete" :disabled="disabled"><i class="far fa-trash-alt"></i></button>
+                        <button class="button is-small is-fullwidth" @click.prevent="onDelete" :disabled="disabled"><i class="far fa-trash-alt"></i></button>
                     </p>
                 </div>
             </td>
@@ -42,7 +42,7 @@ const template = function () {
                                 <div class="column is-half">
                                     <p class="title is-5" v-if="item.stock">Stock: {{ item.stock }}</p>
                                     <figure class="image">
-                                        <img :src="item.imageURL" alt="Product Image" style="width: 320px; height: 320px;">
+                                        <img :src="item.imageURL" alt="Product Image">
                                     </figure>
                                 </div>
                             </div>
@@ -63,12 +63,23 @@ export default {
         });
     },
     props: [
+        'group',
         'item',
         'disabled'
     ],
     emits: [
         'refresh', 'delete'
     ],
+    computed: {
+        isVisible: function() {
+            return(true);
+            if (! this.group) {
+                return(true);
+            } else {
+                return(this.item.groupIds.includes(this.group.id));
+            }
+        }
+    },
     methods: {
         startDrag(evt, item) {
             evt.dataTransfer.dropEffect = 'move';

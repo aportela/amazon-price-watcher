@@ -59,23 +59,23 @@ const template = function () {
                     </tr>
                 </thead>
                 <tbody v-for="group, index in groups" :key="group.id">
-                    <tr class="has-background-grey-lighter has-text-black" style="cursor: pointer;" @click.prevent="group.collapsed = ! group.collapsed"  @drop="onDrop($event, index)" @dragover.prevent @dragenter.prevent>
-                        <th><i class="fas" :class="{ 'fa-angle-double-up': ! group.collapsed, 'fa-angle-double-down': group.collapsed }"></i> {{ group.name }} (0 products)</th>
-                        <th class="has-text-right">{{ 0 }}{{ '€' }}</th>
-                        <th class="has-text-right">{{ 0 }}{{ '€' }}</th>
-                        <td class="has-text-right has-text-weight-bold"></td>
+                    <tr class="has-background-grey-lighter has-text-black is-vcentered" style="cursor: pointer;" @click.prevent="group.collapsed = ! group.collapsed"  @drop="onDrop($event, index)" @dragover.prevent @dragenter.prevent>
+                        <th><i class="fas" :class="{ 'fa-angle-double-up': ! group.collapsed, 'fa-angle-double-down': group.collapsed }"></i> {{ group.name }} ({{ group.items.length }} products)</th>
+                        <th class="has-text-right">{{ group.currentPrice }}{{ '€' }}</th>
+                        <th class="has-text-right">{{ group.previousPrice }}{{ '€' }}</th>
+                        <td class="has-text-right has-text-weight-bold">{{ (Math.abs(group.previousPrice - group.currentPrice)).toFixed(2) }}{{ '€' }}</td>
                         <th></th>
                         <th class="has-text-centered">
-                            <button class="button is-small" @click.prevent="onDeleteGroup(group.id)" :disabled="disabled"><i class="far fa-trash-alt"></i></button>
+                            <button class="button is-small is-fullwidth" @click.prevent="onDeleteGroup(group.id)" :disabled="disabled"><i class="far fa-trash-alt"></i></button>
                         </th>
                     </tr>
-                    <table-row-item v-for="item in group.items" :key="item.id" :item="item" :disabled="loading"></table-row-item>
+                    <table-row-item v-for="item in group.items" :key="item.id" :group="group" :item="item" :disabled="loading" v-on:refresh="onRefresh(item.id)" v-on:delete="onDeleteGroupItem(group.id, item.id)"></table-row-item>
                 </tbody>
                 <tbody>
                     <tr class="has-background-grey-lighter has-text-black" style="cursor: pointer;" @click.prevent="hideItems = !hideItems">
                         <th colspan="6"><i class="fas" :class="{ 'fa-angle-double-up': ! hideItems, 'fa-angle-double-down': hideItems }"></i> All items</th>
                     </tr>
-                    <table-row-item v-for="item in items" :key="item.id" :item="item" :disabled="loading" v-on:refresh="onRefresh(item.id)" v-on:delete="onDelete(item.id)"></table-row-item>
+                    <table-row-item v-for="item in items" :key="item.id" :item="item" :disabled="loading" v-on:refresh="onRefresh(item.id)"></table-row-item>
                 </tbody>
             </table>
         </section>
@@ -145,9 +145,8 @@ export default {
     methods: {
         onDrop(evt, groupIndex) {
             const newItemId = evt.dataTransfer.getData('itemId');
-            if (! this.groups[groupIndex].items.find((item) => item.id == newItemId)) {
-                const item = this.items.find((item) => item.id == newItemId);
-                this.groups[groupIndex].items.push(item);
+            if (! this.items.find((item) => item.id == newItemId && item.groupIds.includes(this.groups[groupIndex].id))) {
+                this.onAddGroupItem(this.groups[groupIndex].id, newItemId);
             }
         },
         onLoad: function () {
@@ -159,6 +158,17 @@ export default {
                         item.increment = item.previousPrice - item.currentPrice;
                         return (item);
                     });
+                    if (this.groups) {
+                        this.groups.forEach((group) => {
+                            group.items = this.items.filter((item) => item.groupIds.includes(group.id));
+                            group.currentPrice = 0;
+                            group.previousPrice = 0;
+                            group.items.forEach((item) => {
+                                group.currentPrice += item.currentPrice;
+                                group.previousPrice += item.previousPrice;
+                            });
+                        });
+                    }
                 }
             });
         },
@@ -167,7 +177,18 @@ export default {
             amazonPriceWatcherAPI.amazonPriceWatcher.searchGroups((response) => {
                 this.loading = false;
                 if (response.status == 200) {
-                    this.groups = response.data.groups.map((item) => { item.collapsed = false; return (item); });
+                    this.groups = response.data.groups.map((item) => { item.collapsed = false; item.currentPrice = 0; item.previousPrice = 0; item.minPrice = 0; item.maxPrice = 0; return (item); });
+                    if (this.items) {
+                        this.groups.forEach((group) => {
+                            group.items = this.items.filter((item) => item.groupIds.includes(group.id));
+                            group.currentPrice = 0;
+                            group.previousPrice = 0;
+                            group.items.forEach((item) => {
+                                group.currentPrice += item.currentPrice;
+                                group.previousPrice += item.previousPrice;
+                            });
+                        });
+                    }
                 }
             });
         },
@@ -189,6 +210,28 @@ export default {
                 this.loading = false;
                 if (response.status == 200) {
                     this.onLoadGroups();
+                } else {
+                    // TODO
+                }
+            });
+        },
+        onAddGroupItem: function (groupId, itemId) {
+            this.loading = true;
+            amazonPriceWatcherAPI.amazonPriceWatcher.addGroupItem(groupId, itemId, (response) => {
+                this.loading = false;
+                if (response.status == 200) {
+                    this.onLoad();
+                } else {
+                    // TODO
+                }
+            });
+        },
+        onDeleteGroupItem: function (groupId, itemId) {
+            this.loading = true;
+            amazonPriceWatcherAPI.amazonPriceWatcher.deleteGroupItem(groupId, itemId, (response) => {
+                this.loading = false;
+                if (response.status == 200) {
+                    this.onLoad();
                 } else {
                     // TODO
                 }
