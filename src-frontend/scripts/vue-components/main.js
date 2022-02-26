@@ -1,5 +1,6 @@
+import { VueElement } from 'vue';
 import { default as amazonPriceWatcherAPI } from '../api.js';
-import { default as tableItem } from './table-item.js';
+import { default as tableGroupItem } from './table-group-item.js';
 
 const template = function () {
     return `
@@ -50,7 +51,8 @@ const template = function () {
             <table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth">
                 <thead>
                     <tr>
-                        <th style="width: 50%" @click.prevent="onSort('name')">Article</th>
+                        <th style="width: 4em;"></th>
+                        <th style="max-width: 50%" @click.prevent="onSort('name')">Article</th>
                         <th class="has-text-right" @click.prevent="onSort('currentPrice')">Price</th>
                         <th class="has-text-right" @click.prevent="onSort('previousPrice')">Previous price</th>
                         <th class="has-text-right" @click.prevent="onSort('increment')">Increment</th>
@@ -58,25 +60,8 @@ const template = function () {
                         <th>Operations</th>
                     </tr>
                 </thead>
-                <tbody v-for="group, index in groups" :key="group.id">
-                    <tr class="has-background-grey-lighter has-text-black is-vcentered" style="cursor: pointer;" @click.prevent="group.collapsed = ! group.collapsed"  @drop="onDrop($event, index)" @dragover.prevent @dragenter.prevent>
-                        <th><i class="fas" :class="{ 'fa-angle-double-up': ! group.collapsed, 'fa-angle-double-down': group.collapsed }"></i> {{ group.name }} ({{ group.items.length }} products)</th>
-                        <th class="has-text-right">{{ group.currentPrice }}{{ '€' }}</th>
-                        <th class="has-text-right">{{ group.previousPrice }}{{ '€' }}</th>
-                        <td class="has-text-right has-text-weight-bold">{{ (Math.abs(group.previousPrice - group.currentPrice)).toFixed(2) }}{{ '€' }}</td>
-                        <th></th>
-                        <th class="has-text-centered">
-                            <button class="button is-small is-fullwidth" @click.prevent="onDeleteGroup(group.id)" :disabled="disabled"><i class="far fa-trash-alt"></i></button>
-                        </th>
-                    </tr>
-                    <table-row-item v-for="item in group.items" :key="item.id" :group="group" :item="item" :disabled="loading" v-on:refresh="onRefresh(item.id)" v-on:delete="onDeleteGroupItem(group.id, item.id)"></table-row-item>
-                </tbody>
-                <tbody>
-                    <tr class="has-background-grey-lighter has-text-black" style="cursor: pointer;" @click.prevent="hideItems = !hideItems">
-                        <th colspan="6"><i class="fas" :class="{ 'fa-angle-double-up': ! hideItems, 'fa-angle-double-down': hideItems }"></i> All items</th>
-                    </tr>
-                    <table-row-item v-for="item in items" :key="item.id" :item="item" :disabled="loading" v-on:refresh="onRefresh(item.id)"></table-row-item>
-                </tbody>
+                <table-group-item v-for="group in groups" :key="group.id" :group="group" @delete-group="onDeleteGroup($event.groupId)" @add-product="onAddGroupItem(group.id, $event.productId)"></table-group-item>
+                <table-group-item  :group="{ id: null, name: 'All items', items: items }"></table-group-item>
             </table>
         </section>
     `;
@@ -140,15 +125,9 @@ export default {
         }
     },
     components: {
-        'table-row-item': tableItem
+        'table-group-item': tableGroupItem
     },
     methods: {
-        onDrop(evt, groupIndex) {
-            const newItemId = evt.dataTransfer.getData('itemId');
-            if (! this.items.find((item) => item.id == newItemId && item.groupIds.includes(this.groups[groupIndex].id))) {
-                this.onAddGroupItem(this.groups[groupIndex].id, newItemId);
-            }
-        },
         onLoad: function () {
             this.loading = true;
             amazonPriceWatcherAPI.amazonPriceWatcher.search((response) => {
@@ -161,12 +140,6 @@ export default {
                     if (this.groups) {
                         this.groups.forEach((group) => {
                             group.items = this.items.filter((item) => item.groupIds.includes(group.id));
-                            group.currentPrice = 0;
-                            group.previousPrice = 0;
-                            group.items.forEach((item) => {
-                                group.currentPrice += item.currentPrice;
-                                group.previousPrice += item.previousPrice;
-                            });
                         });
                     }
                 }
@@ -181,12 +154,6 @@ export default {
                     if (this.items) {
                         this.groups.forEach((group) => {
                             group.items = this.items.filter((item) => item.groupIds.includes(group.id));
-                            group.currentPrice = 0;
-                            group.previousPrice = 0;
-                            group.items.forEach((item) => {
-                                group.currentPrice += item.currentPrice;
-                                group.previousPrice += item.previousPrice;
-                            });
                         });
                     }
                 }
