@@ -8,7 +8,7 @@ const template = function () {
                 <th>
                     <button class="button is-small is-fullwidth" :disabled="disabled || loading"><i class="fas" :class="{ 'fa-angle-double-up': expanded, 'fa-angle-double-down': ! expanded }"></i></button>
                 </th>
-                <th>{{ group.name }} ({{ group.items.length }} products)</th>
+                <th>{{ group.name }} ({{ group.items.length }} products) <input type="text" placeholder="search product by name..." v-if="! group.id && expanded" v-model.trim="searchArticleByName" @click.prevent.stop></th>
                 <th class="has-text-right">{{ currentPrice.toFixed(2) }}{{ '€' }}</th>
                 <th class="has-text-right">{{ previousPrice.toFixed(2) }}{{ '€' }}</th>
                 <td class="has-text-right has-text-weight-bold">
@@ -35,7 +35,8 @@ export default {
             loading: false,
             expanded: false,
             currentPrice: 0,
-            previousPrice: 0
+            previousPrice: 0,
+            searchArticleByName: null
         });
     },
     props: [
@@ -54,6 +55,9 @@ export default {
                 this.currentPrice += item.currentPrice;
                 this.previousPrice += item.previousPrice;
             });
+        },
+        searchArticleByName: function(newValue, oldValue) {
+
         }
     },
     created: function() {
@@ -64,7 +68,15 @@ export default {
             return(this.group.items);
         },
         visibleItems: function() {
-            return(this.expanded ? this.group.items: []);
+            if (! this.searchArticleByName) {
+                return(this.expanded ? this.group.items: []);
+            } else {
+                if (this.expanded) {
+                    return(this.group.items.filter((item) => item.name.toLocaleLowerCase().indexOf(this.searchArticleByName.toLocaleLowerCase()) >= 0));
+                } else {
+                    return([]);
+                }
+            }
         },
         incrementPrice: function() {
             return(this.previousPrice - this.currentPrice);
