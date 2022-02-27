@@ -1,5 +1,5 @@
 import { default as amazonPriceWatcherAPI } from '../api.js';
-import { default as tableItem } from './table-item.js';
+import { default as tableItem } from './table-product-item.js';
 
 const template = function () {
     return `

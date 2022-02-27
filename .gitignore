@@ -5,4 +5,4 @@
 composer.lock
 package-lock.json
 data/amazon-price-watcher.sqlite3
-cookie.txt
+data/cookie.txt
