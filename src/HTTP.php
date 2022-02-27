@@ -15,8 +15,8 @@
                 curl_setopt ($ch, CURLOPT_FOLLOWLOCATION, true);
                 curl_setopt ($ch, CURLOPT_TIMEOUT, 3);
                 curl_setopt($ch, CURLOPT_ENCODING , 'gzip,deflate,br');
-                curl_setopt($ch, CURLOPT_COOKIEJAR, './cookie.txt');
-                curl_setopt($ch, CURLOPT_COOKIEFILE, './cookie.txt');
+                curl_setopt($ch, CURLOPT_COOKIEJAR, '../data/cookie.txt');
+                curl_setopt($ch, CURLOPT_COOKIEFILE, '../data/cookie.txt');
                 if (empty($userAgent)) {
                     curl_setopt ($ch, CURLOPT_USERAGENT, 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:97.0) Gecko/20100101 Firefox/97.0');
                 } else {
