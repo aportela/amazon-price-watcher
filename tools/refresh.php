@@ -16,7 +16,7 @@
             } else {
                 echo " ERROR!" . PHP_EOL;
             }
-            sleep(5);
+            sleep(1);
         }
     } else {
         echo "No products found" . PHP_EOL;
